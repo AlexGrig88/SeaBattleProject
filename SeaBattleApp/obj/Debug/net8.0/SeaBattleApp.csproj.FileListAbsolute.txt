@@ -1,0 +1,14 @@
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/bin/Debug/net8.0/SeaBattleApp
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/bin/Debug/net8.0/SeaBattleApp.deps.json
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/bin/Debug/net8.0/SeaBattleApp.runtimeconfig.json
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/bin/Debug/net8.0/SeaBattleApp.dll
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/bin/Debug/net8.0/SeaBattleApp.pdb
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/SeaBattleApp.GeneratedMSBuildEditorConfig.editorconfig
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/SeaBattleApp.AssemblyInfoInputs.cache
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/SeaBattleApp.AssemblyInfo.cs
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/SeaBattleApp.csproj.CoreCompileInputs.cache
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/SeaBattleApp.dll
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/refint/SeaBattleApp.dll
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/SeaBattleApp.pdb
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/SeaBattleApp.genruntimeconfig.cache
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/ref/SeaBattleApp.dll
