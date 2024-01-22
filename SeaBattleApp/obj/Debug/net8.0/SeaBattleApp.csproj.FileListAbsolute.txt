@@ -12,3 +12,4 @@
 /home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/SeaBattleApp.pdb
 /home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/SeaBattleApp.genruntimeconfig.cache
 /home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/ref/SeaBattleApp.dll
+/home/alexgrig/CSharpProjects/SeaBattleProject/SeaBattleApp/obj/Debug/net8.0/SeaBattleApp.sourcelink.json
