@@ -13,8 +13,8 @@ namespace SeaBattleApp
         private int _rows;
         private int _columns;
 
-        public List<Ship> MyShips { get; set; }
-        public List<Ship> OpponentShips { get; set; }
+        public List<Ship> ShipsList { get; set; }
+        public List<string> AllPositions { get; set; }
         public int[,] Field { get; private set; }
         public int Rows { 
             get => _rows; 
@@ -45,17 +45,24 @@ namespace SeaBattleApp
             Rows = rows;
             Columns = columns;
             Field = new int[Rows, Columns];
-            MyShips = new List<Ship>();
-
+            ShipsList = new List<Ship>();
+            AllPositions = new List<string>(rows * columns);
+            for (int i = 0, ch = 'А'; i < rows; ++i)
+            {
+                for (int j = 1; j <= columns; j++)
+                {
+                    if (ch == 'Ё' || ch == 'Й') ++ch;
+                    AllPositions.Add($"{j}{(char)ch}");
+                }
+                Console.WriteLine();
+                ch += 1;
+            }
         }
 
         public bool TryToPlaceTheShip(Ship ship, Coordinate beginCoord, out string errorMassage)
         {
             errorMassage = "КОРАБЛЬ РАЗМЕЩЁН";
-            if (!_isItMyField) {
-                errorMassage = "НЕВОЗМОЖНО РАЗМЕСТИТЬ КОРАБЛЬ НА ПОЛЕ ПРОТИВНИКА!";
-                return false;
-            }
+
             var validCoords1 = beginCoord.Row >= 0 || beginCoord.Col >= 0 || beginCoord.Row < _rows || beginCoord.Col < _columns;
             var validCoords2 = ship.IsHorizontalOrientation ?
                                beginCoord.Col + ship.Length <= _columns :
@@ -64,20 +71,19 @@ namespace SeaBattleApp
                 errorMassage = "КООРДИНАТЫ ЛЕЖАТ ЗА ПРЕДЕЛАМИ ПОЛЯ";
                 return false;
             }
-            CurrentMapLengthByCounter[ship.Length]++;
-            if (CurrentMapLengthByCounter[ship.Length] > ExpectedMapLengthByCounter[ship.Length]) {
+            
+            if (CurrentMapLengthByCounter[ship.Length] >= ExpectedMapLengthByCounter[ship.Length]) {
                 errorMassage = $"ЧИСЛО КОРАБЛЕЙ С ДЛИНОЙ {ship.Length} ДОЛЖНО БЫТЬ НЕ БОЛЬШЕ {ExpectedMapLengthByCounter[ship.Length]}";
                 return false;
             }
-        
+
             if (!TryPutInTheField(ship, beginCoord, out string msg)) {
                 errorMassage = msg;
                 return false;
             }
-            
+            CurrentMapLengthByCounter[ship.Length]++;
             ship.BeginCoord = beginCoord;
-            MyShips.Add(ship);
-            // ExtractCoordsAndToPlace(ship);
+            ShipsList.Add(ship);
             return true;
         }
 
@@ -104,23 +110,12 @@ namespace SeaBattleApp
             return true;
         }
 
-        // private void ExtractCoordsAndToPlace(Ship ship)
-        // {
-        //     var row = ship.BeginCoord.Row;
-        //     var col = ship.BeginCoord.Col;
-        //     for (int i = 0, j = 0; i < ship.Length && j < ship.Length;)
-        //     {
-        //         row += i; 
-        //         col += j;
-        //         Field[row, col] = MarkVisibleShip;
-        //         if (ship.IsHorizontalOrientation) ++j;
-        //         else ++i;
-        //     }
-        // }
-
         private bool ValidAdjacentCells(int rowPos, int colPos, out string errorMsg)
         {
-            int[][] around = [[1, 1], [1, 0], [0, 1], [-1, -1], [-1, 0], [0, -1], [1, -1], [-1, 1]];
+            int[][] around = new int[8][] {
+                new int[] { 1, 1 }, new int[] {1, 0 }, new int[] {0, 1 }, new int[]{-1, -1 },
+                new int[]{-1, 0 }, new int[] {0, -1}, new int[] {1, -1 }, new int[] {-1, 1 }
+                };
             errorMsg = "Ok";
             for (int i = 0; i < around.GetLength(0); i++)
             {

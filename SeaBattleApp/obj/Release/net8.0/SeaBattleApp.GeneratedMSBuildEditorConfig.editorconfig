@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = SeaBattleApp
-build_property.ProjectDir = C:\Users\UserGrig\source\repos\AlexGrig88\SeaBattleProject\SeaBattleApp\
+build_property.ProjectDir = C:\Users\UserGrig\Source\Repos\AlexGrig88\SeaBattleProject\SeaBattleApp\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
