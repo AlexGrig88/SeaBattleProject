@@ -140,13 +140,4 @@ class Program
             System.Console.WriteLine();
         }
 
-        static void Test() {
-            char ch = 'А';
-            for (int i = 0; i < 33; i++)
-            {
-                System.Console.WriteLine(ch);
-                ch = (char)(ch + 1);
-            }
-            System.Console.WriteLine('И' > 'И');
-        }
 }
