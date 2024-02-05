@@ -7,15 +7,17 @@ namespace SeaBattleApp
     public class Game
     {
         public delegate void AddShipHandler(object sender, Ship ship);
-        public event AddShipHandler? AddingAShipEvent;
+        public event AddShipHandler? AddShipEvent;
 
         public enum Mode { SinglePlayer, TwoPlayers }
         public const char FIRST_CHAR_RU = 'А';
 
         public Mode ModeGame { get; init; }
+
         public string Greeting { get; } = "Добро пожаловать на игру \"Морской бой!\"";
         public BattleField MyField { get; }
         public BattleField OpponentField { get; }
+        public BattleField CurrentField { get; private set; }
 
 
         public Game(Mode mode = Mode.SinglePlayer)
@@ -25,7 +27,13 @@ namespace SeaBattleApp
             OpponentField = new BattleField(false, 10, 10);
             if (mode == Mode.SinglePlayer)
             {
+                CurrentField = MyField;
                 PlaceOpponentShips();
+            }
+            else 
+            {
+                CurrentField = MyField;
+                // Тут будет назначаться поле противника, как this.OpponentField = gameOther.MyField
             }
         }
 
@@ -33,7 +41,7 @@ namespace SeaBattleApp
             if (!MyField.TryToPlaceTheShip(ship, coord, out string errorMsg)) {
                 return (false, errorMsg);
             };
-            AddingAShipEvent?.Invoke(this, ship);
+            AddShipEvent?.Invoke(this, ship);
             return (true, "Success");
         }
 
@@ -82,7 +90,6 @@ namespace SeaBattleApp
                 var ship = ChooseTheShip(shipsOutside, len);
                 ship.IsHorizontalOrientation = arrOfBool[random.Next(0, 2)];
                 var randIdx = random.Next(0, size);
-                Console.WriteLine($"\nRandom postion: {allPositions[randIdx]}\n");
                 while (!OpponentField.TryToPlaceTheShip(ship, Coordinate.ParseRu(allPositions[randIdx]), out string errorMsg))
                 {
                     randIdx = random.Next(0, size);
@@ -162,6 +169,18 @@ namespace SeaBattleApp
             return ship;
         }
 
+        public bool TryShootAtTheTarget(Coordinate coord, bool isItMyMove, ref bool shipIsDestroyed) {
+            bool result = false;
+            if (isItMyMove) {
+                CurrentField = OpponentField;
+                result = OpponentField.TryHitTheShip(coord, ref shipIsDestroyed);
+            }
+            else {
+                result = MyField.TryHitTheShip(coord, ref shipIsDestroyed);
+            }
+            AddShipEvent?.Invoke(this, null);
+            return result;    
+        }
 
     }
 }

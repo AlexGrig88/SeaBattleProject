@@ -6,9 +6,15 @@ namespace SeaBattleApp
     {
         const int ROW_MAX_VALUE = 31;
         const int COLUMN_MAX_VALUE = 31;
-        private enum CellState { Unexplored = 0, Empty, BurningShip, DestroyedShip };   // состояние ячейки изменяется путём прибавления нового состояния к начальному 0
+        private int[][] _around = new int[8][] {
+                new int[] { 1, 1 }, new int[] {1, 0 }, new int[] {0, 1 }, new int[]{-1, -1 },
+                new int[]{-1, 0 }, new int[] {0, -1}, new int[] {1, -1 }, new int[] {-1, 1 }
+                };
+                
+        public enum CellState { Unexplored = 0, Empty, BurningShip, DestroyedShip };   // состояние ячейки изменяется путём прибавления нового состояния к начальному 0
         public static int MarkIsAShip { get; } = 5;   //  число, которое служит меткой, что корабля установлен в ячейку и виден
                                                     //  (MarkVisibleShip + BurningShip) ~ 5 + 2 = 7  - число, определяющее, что корабль виден и подбит, аналогично с estroyedShip
+
         private bool _isItMyField;
         private int _rows;
         private int _columns;
@@ -36,10 +42,12 @@ namespace SeaBattleApp
 
         public Dictionary<int, int> ExpectedMapLengthByCounter { get; }    // счётчик, определяющий колличество кораблей (в зависимости от длины(палубности)), возможных для размещения
         public Dictionary<int, int> CurrentMapLengthByCounter { get; }     // текущий счетчик кораблей на поле
+        public int ShipsCounter { get; set; }
 
         public BattleField(bool isItMyField, int rows = 10, int columns = 10)
         {
             _isItMyField = isItMyField;
+            ShipsCounter = 10;
             ExpectedMapLengthByCounter = new Dictionary<int, int>() { {1, 4}, {2, 3}, {3, 2}, {4, 1} };
             CurrentMapLengthByCounter = new Dictionary<int, int>() { {1, 0}, {2, 0}, {3, 0}, {4, 0} };
             Rows = rows;
@@ -112,22 +120,69 @@ namespace SeaBattleApp
 
         private bool ValidAdjacentCells(int rowPos, int colPos, out string errorMsg)
         {
-            int[][] around = new int[8][] {
-                new int[] { 1, 1 }, new int[] {1, 0 }, new int[] {0, 1 }, new int[]{-1, -1 },
-                new int[]{-1, 0 }, new int[] {0, -1}, new int[] {1, -1 }, new int[] {-1, 1 }
-                };
             errorMsg = "Ok";
-            for (int i = 0; i < around.GetLength(0); i++)
+            for (int i = 0; i < _around.GetLength(0); i++)
             {
-                if (rowPos + around[i][0] < 0 || rowPos + around[i][0] >= _rows ||
-                    colPos + around[i][1] < 0 || colPos + around[i][1] >= _rows)
+                if (IsNotValidBoundaries(rowPos, colPos, i))
                     continue;
-                if (Field[rowPos + around[i][0], colPos + around[i][1]] == MarkIsAShip) {
+                if (Field[rowPos + _around[i][0], colPos + _around[i][1]] == MarkIsAShip) {
                     errorMsg = "НЕВОЗМОЖНО УСТАНОВИТЬ КОРАБЛЬ КАСАЮЩИЙСЯ СОСЕДНЕГО КОРАБЛЯ";
                     return false;
                 }
             }
             return true;
         }
+
+        public bool TryHitTheShip(Coordinate coord, ref bool shipIsDestroyed)
+        {
+            System.Console.WriteLine($"Debug: row={coord.Row}; col={coord.Col}");
+            bool isHit = false;
+            if (Field[coord.Row, coord.Col] == MarkIsAShip) {
+                Field[coord.Row, coord.Col] = (int)CellState.BurningShip;
+                isHit = true;
+            }
+            else {
+                shipIsDestroyed = false;
+                return false;
+            }
+            for (int i = 0; i < _around.GetLength(0); i++) {
+                if (IsNotValidBoundaries(coord.Row, coord.Col, i)) {
+                    continue;
+                }
+                if (Field[coord.Row  + _around[i][0], coord.Col + _around[i][1]] == MarkIsAShip) {
+                    shipIsDestroyed = false;
+                    return isHit;
+                }
+            }
+            Field[coord.Row, coord.Col] = (int)CellState.DestroyedShip;
+            MarkAroundEmpty(coord.Row, coord.Col);
+            shipIsDestroyed = true;
+            --ShipsCounter;
+            return isHit;
+        }
+
+        private void MarkAroundEmpty(int row, int col) {
+            for (int i = 0; i < _around.GetLength(0); i++) {
+                if (IsNotValidBoundaries(row, col, i)) {
+                    continue;
+                }
+                if (Field[row  + _around[i][0], col + _around[i][1]] == (int)CellState.DestroyedShip) {
+                    continue;
+                }
+                if (Field[row  + _around[i][0], col + _around[i][1]] == (int)CellState.BurningShip) {
+                    Field[row + _around[i][0], col + _around[i][1]] = (int)CellState.DestroyedShip;
+                    MarkAroundEmpty(row + _around[i][0], col + _around[i][1]);
+                }
+                else {
+                    Field[row + _around[i][0], col + _around[i][1]] = (int)CellState.Empty;   
+                }
+            }
+        }
+
+        private bool IsNotValidBoundaries(int row, int col, int i) => row + _around[i][0] < 0 || row + _around[i][0] >= Rows ||
+                    col + _around[i][1] < 0 || col + _around[i][1] >= Columns;
+
     } 
+
+
 }

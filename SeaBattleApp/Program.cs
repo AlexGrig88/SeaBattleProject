@@ -29,12 +29,13 @@ class Program
 
 
         // Добавить событие на добавления корабля в поле(отрисовка моего поля с кораблями)
-        game.AddingAShipEvent += HandleAddingAShip;
+        game.AddShipEvent += HandleAddingAShip;
 
 
 
         while (shipsOutside.Count > 0)
         {
+            break;
             Console.WriteLine($"Выберите корабль нужной палубности и разместите его на поле указав координату начала и ориентацию.\nВсего осталось {shipsOutside.Count} кораблей.");
             Console.WriteLine("Скольки палубный вы хотите добавить на поле (до 1 до 4)?: ");
             int len;
@@ -64,15 +65,7 @@ class Program
         // label for goto
         TryCoordinates:      
             Console.Write("Вводите координату (сначала номер строки, потом букву столбца, без пробелов): ");
-            string coords = Console.ReadLine()?.ToUpper() ?? "123DDD";
-            while (!game.IsValidRuCoordinate(coords))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Координата не корректная!\nПопробуйте ещё раз!\n");
-                Console.ForegroundColor = ConsoleColor.Gray;
-                coords = Console.ReadLine()?.ToUpper() ?? "123DDD";
-            }
-
+            string coords = ReadValidCoords(game);
 
             System.Console.WriteLine("Введите ориентацию корабля (в - вертикальная, г - горизонтальная): ");
             string orientation = Console.ReadLine()!.ToLower();
@@ -92,52 +85,103 @@ class Program
                 Console.ForegroundColor = ConsoleColor.Gray;
                 goto TryCoordinates;
             }
-
         }
 
-        /*        Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Done!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-                Console.ForegroundColor = ConsoleColor.Gray;
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Done!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+        Console.ForegroundColor = ConsoleColor.Gray;
 
-                Console.WriteLine("Нажмите Enter, чтобы запустить установку кораблей компьютера оппонента");
-                Console.ReadKey();
-                game.PlaceOpponentShips();*/
+        Console.WriteLine("Тперерь можете стрелять по вражеским кораблям!\nНаведите вашу пушку и пли (введите координату)!!!!\n");
+        string targetCoords = ReadValidCoords(game);
+        System.Console.WriteLine($"targetCoord = {targetCoords}");
+        bool shipIsDestroyed = false;
+        while (game.TryShootAtTheTarget(Coordinate.ParseRu(targetCoords), true, ref shipIsDestroyed)) {
+            if (!shipIsDestroyed) {
+                System.Console.WriteLine("Вы молодец, вы подбили в корабль! Стреляйте ещё раз (введите координату)!!!");
+                targetCoords = ReadValidCoords(game);
+            }
+            else {
+                System.Console.WriteLine("УРА!!!!!!!!!!!!\nКорабль уничтожен!!!\nСтреляйте ещё раз (введите координату)!!!");
+                if (game.CurrentField.ShipsCounter == 0) {
+                    System.Console.WriteLine("О НЕТ!!! ВЫ ЖЕ ПОБЕДИЛИ!!!! КРАСАВЧИК!!!");
+                    return;
+                }
+                targetCoords = ReadValidCoords(game);
+            }
+        }
+        
+
     }
 
-    static void HandleAddingAShip(object sender, Ship ship) {
-        var game = (Game)sender;
-        if (game.MyField.ShipsList.Count == 0) {
-            ShowBattleField(game.MyField);
-            return;
+    static string ReadValidCoords(Game game) {
+        string coords = Console.ReadLine()?.ToUpper() ?? "123DDD";
+        while (!game.IsValidRuCoordinate(coords))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Координата не корректная!\nПопробуйте ещё раз!\n");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            coords = Console.ReadLine()?.ToUpper() ?? "123DDD";
         }
-        System.Console.WriteLine($"Установлен один {ship.Length}-палубный корабль.\nВаше поле:");
-        ShowBattleField(game.MyField);
+        return coords;
+    }
+
+    static void HandleAddingAShip(object sender, Ship? ship) {
+        var game = (Game)sender;
+        // if (game.MyField.ShipsList.Count == 0) {
+        //     ShowBattleField(game.MyField);
+        //     return;
+        // }
+        if (ship != null)
+            Console.WriteLine($"Установлен один {ship.Length}-палубный корабль.\nВаше поле:");
+        ShowBattleField(game.CurrentField);
 
     }
 
     static void ShowBattleField(BattleField battleField)
+    {
+        int[,] field = battleField.Field;
+        var charCol = Game.FIRST_CHAR_RU;
+        Console.Write("    ");
+        for (int i = 0; i < field.GetLength(1); i++)
         {
-            int[,] field = battleField.Field;
-            var charCol = Game.FIRST_CHAR_RU;
-            Console.Write("    ");
-            for (int i = 0; i < field.GetLength(1); i++)
-            {
-                var ch = charCol == 'Й' || charCol == 'Ё' ? ++charCol : charCol;
-                Console.Write($"{charCol++} ");
-            }
-            Console.WriteLine("\n   " + new string('-', field.GetLength(1) * 2));
-
-            for (int i = 0; i < field.GetLength(0); ++i) {
-                var indent = (i + 1) < 10 ? " " : ""; 
-                Console.Write($"{i + 1}{indent}| ");
-                for (int j = 0; j < field.GetLength(1); ++j)
-                {
-                    char shipImg = field[i, j] == BattleField.MarkIsAShip ? 'S' : '.';
-                    Console.Write(shipImg + " ");
-                }
-                Console.WriteLine();
-            }
-            System.Console.WriteLine();
+            var ch = charCol == 'Й' || charCol == 'Ё' ? ++charCol : charCol;
+            Console.Write($"{charCol++} ");
         }
+        Console.WriteLine("\n   " + new string('-', field.GetLength(1) * 2));
+
+        for (int i = 0; i < field.GetLength(0); ++i) {
+            var indent = (i + 1) < 10 ? " " : ""; 
+            Console.Write($"{i + 1}{indent}| ");
+            for (int j = 0; j < field.GetLength(1); ++j)
+            {
+                //char shipImg = field[i, j] == BattleField.MarkIsAShip ? 'S' : '.';
+                char shipImg = '.';
+                if (field[i, j] == BattleField.MarkIsAShip) {
+                    shipImg = 'S';
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+                else if (field[i, j] == (int)BattleField.CellState.Unexplored) {
+                    shipImg = '*';
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                }
+                else if (field[i, j] == (int)BattleField.CellState.Empty) {
+                    shipImg = '-';
+                    Console.ForegroundColor = ConsoleColor.White;
+                } 
+                else if (field[i, j] == (int)BattleField.CellState.BurningShip) {
+                    shipImg = 'B';
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                else if (field[i, j] == (int)BattleField.CellState.DestroyedShip) {
+                    shipImg = 'X';
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                }
+                Console.Write(shipImg + " ");
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+            Console.WriteLine();
+        }
+        System.Console.WriteLine();
+    }
 
 }
